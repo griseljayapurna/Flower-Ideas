@@ -10,6 +10,9 @@ const MAX_SCALE = 12;
 const STEP_SCALE = 1.15;
 const STEP_ROT = Math.PI / 12; // 15°
 const HISTORY_LIMIT = 60;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 6;
+const ZOOM_STEP = 1.4;
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
@@ -42,7 +45,7 @@ export function loadSource(src) {
 }
 
 export class Editor {
-  constructor(canvas, { onChange, onSelect } = {}) {
+  constructor(canvas, { onChange, onSelect, onViewChange } = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.onChange = onChange || (() => {});
@@ -58,6 +61,9 @@ export class Editor {
     this.future = [];
     this.snapshot = '[]';
     this.view = { s: 1, ox: 0, oy: 0, dpr: 1, cw: 0, ch: 0 };
+    this.zoom = 1;               // 1 = whole picture fits the screen
+    this.center = { x: 0, y: 0 }; // picture point shown in the middle of the screen
+    this.onViewChange = onViewChange || (() => {});
     this._raf = 0;
 
     canvas.addEventListener('pointerdown', e => this._down(e));
@@ -88,6 +94,8 @@ export class Editor {
       if (rec) this.bgImg = await loadImageFromBlob(rec.blob);
     }
     await Promise.all(this.items.map(it => this._ensureLoaded(it.src)));
+    this.zoom = 1;
+    this.center = { x: design.world.w / 2, y: design.world.h / 2 };
     this.fit();
     this.onSelect(null);
   }
@@ -127,12 +135,60 @@ export class Editor {
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
     this.canvas.width = Math.round(cw * dpr);
     this.canvas.height = Math.round(ch * dpr);
+    this.view.dpr = dpr;
+    this.view.cw = cw;
+    this.view.ch = ch;
+    this._layout();
+  }
+
+  /** Scale at which the whole picture fits, with a small margin for its shadow. */
+  _fitScale() {
+    const { cw, ch } = this.view;
+    const pad = Math.min(16, cw * 0.04);
+    return Math.min((cw - pad * 2) / this.world.w, (ch - pad * 2) / this.world.h);
+  }
+
+  /** Work out scale and offset from the zoom level and the centre point. */
+  _layout() {
     if (this.design) {
       const { w, h } = this.world;
-      const s = Math.min(cw / w, ch / h);
-      this.view = { s, ox: (cw - w * s) / 2, oy: (ch - h * s) / 2, dpr, cw, ch };
+      const { cw, ch } = this.view;
+      const s = this._fitScale() * this.zoom;
+      // Keep the picture on screen: when zoomed in, never show past its edges.
+      const hw = cw / (2 * s), hh = ch / (2 * s);
+      this.center.x = hw >= w / 2 ? w / 2 : clamp(this.center.x, hw, w - hw);
+      this.center.y = hh >= h / 2 ? h / 2 : clamp(this.center.y, hh, h - hh);
+      this.view.s = s;
+      this.view.ox = cw / 2 - this.center.x * s;
+      this.view.oy = ch / 2 - this.center.y * s;
     }
     this.render();
+    this.onViewChange(this.zoom);
+  }
+
+  // ---------- Zoom ----------
+  /** Zoom so the picture point under (clientX, clientY) stays under it. */
+  setZoom(z, clientX, clientY) {
+    if (!this.design) return;
+    const r = this.canvas.getBoundingClientRect();
+    if (clientX === undefined) { clientX = r.left + r.width / 2; clientY = r.top + r.height / 2; }
+    const anchor = this.toWorld(clientX, clientY);
+    this.zoom = clamp(z, MIN_ZOOM, MAX_ZOOM);
+    const s = this._fitScale() * this.zoom;
+    this.center = {
+      x: anchor.x - (clientX - r.left - this.view.cw / 2) / s,
+      y: anchor.y - (clientY - r.top - this.view.ch / 2) / s,
+    };
+    this._layout();
+  }
+
+  zoomIn() { this.setZoom(this.zoom * ZOOM_STEP); }
+  zoomOut() { this.setZoom(this.zoom / ZOOM_STEP); }
+  resetZoom() {
+    if (!this.design) return;
+    this.zoom = 1;
+    this.center = { x: this.world.w / 2, y: this.world.h / 2 };
+    this._layout();
   }
 
   toWorld(clientX, clientY) {
@@ -157,6 +213,14 @@ export class Editor {
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (!this.design) return;
     ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * ox, dpr * oy);
+    // Soft shadow around the picture so it sits on the page like a card.
+    ctx.save();
+    ctx.shadowColor = 'rgba(77, 63, 143, 0.22)';
+    ctx.shadowBlur = 28 * dpr;
+    ctx.shadowOffsetY = 8 * dpr;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, this.world.w, this.world.h);
+    ctx.restore();
     this.drawWorld(ctx);
     // Selection outline in screen pixels so it stays crisp and the same thickness.
     const sel = this.items.find(it => it.uid === this.selected);
@@ -287,24 +351,51 @@ export class Editor {
 
     if (this.pointers.size === 1) {
       const hit = this._hit(this.toWorld(e.clientX, e.clientY));
-      this.select(hit ? hit.uid : null);
-      this._startDrag();
+      if (hit) {
+        this.select(hit.uid);
+        this._startDrag();
+      } else {
+        // Empty spot: look around (when zoomed). The chosen flower stays chosen
+        // until this turns out to be a plain tap, so a two-finger pinch that
+        // starts beside a small flower still resizes that flower.
+        this.gesture = { type: 'pan', sx: e.clientX, sy: e.clientY, c0: { ...this.center }, tap: true };
+      }
     } else if (this.pointers.size === 2) {
       this._startPinch();
     }
   }
 
+  /** One finger: move the chosen flower, or look around the picture if none is chosen. */
   _startDrag() {
     const it = this.selectedItem();
     const [p] = [...this.pointers.values()];
-    if (!it || !p) { this.gesture = null; return; }
-    this.gesture = { type: 'drag', start: this.toWorld(p.x, p.y), x0: it.x, y0: it.y, moved: this.gesture?.moved };
+    const edited = this.gesture?.edited;
+    if (!p) { this.gesture = null; return; }
+    if (!it) {
+      this.gesture = { type: 'pan', sx: p.x, sy: p.y, c0: { ...this.center }, edited };
+      return;
+    }
+    this.gesture = { type: 'drag', start: this.toWorld(p.x, p.y), x0: it.x, y0: it.y, moved: false, edited };
   }
 
+  /** Two fingers: resize/turn the chosen flower, or zoom the whole picture if none is chosen. */
   _startPinch() {
     const it = this.selectedItem();
-    if (!it) { this.gesture = null; return; }
     const [a, b] = [...this.pointers.values()];
+    const edited = this.gesture?.edited;
+    if (!it) {
+      const r = this.canvas.getBoundingClientRect();
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      this.gesture = {
+        type: 'viewpinch',
+        d0: Math.hypot(b.x - a.x, b.y - a.y) || 1,
+        z0: this.zoom,
+        anchor: this.toWorld(mx, my),
+        rect: r,
+        edited,
+      };
+      return;
+    }
     const wa = this.toWorld(a.x, a.y), wb = this.toWorld(b.x, b.y);
     this.gesture = {
       type: 'pinch',
@@ -312,7 +403,7 @@ export class Editor {
       a0: Math.atan2(wb.y - wa.y, wb.x - wa.x),
       m0: { x: (wa.x + wb.x) / 2, y: (wa.y + wb.y) / 2 },
       x0: it.x, y0: it.y, s0: it.scale, r0: it.rot,
-      moved: this.gesture?.moved,
+      edited,
     };
   }
 
@@ -321,14 +412,40 @@ export class Editor {
     e.preventDefault();
     this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const g = this.gesture;
-    const it = this.selectedItem();
-    if (!g || !it) return;
+    if (!g) return;
 
+    if (g.type === 'pan' && this.pointers.size === 1) {
+      if (g.tap && Math.hypot(e.clientX - g.sx, e.clientY - g.sy) > 8) g.tap = false;
+      if (this.zoom <= 1) return;
+      const s = this.view.s;
+      this.center = { x: g.c0.x - (e.clientX - g.sx) / s, y: g.c0.y - (e.clientY - g.sy) / s };
+      this._layout();
+      return;
+    }
+    if (g.type === 'viewpinch' && this.pointers.size >= 2) {
+      const [a, b] = [...this.pointers.values()];
+      const d = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      const { cw, ch } = this.view;
+      this.zoom = clamp(g.z0 * (d / g.d0), MIN_ZOOM, MAX_ZOOM);
+      const s = this._fitScale() * this.zoom;
+      // Keep the picture point that was between the fingers under the fingers.
+      this.center = {
+        x: g.anchor.x - (mx - g.rect.left - cw / 2) / s,
+        y: g.anchor.y - (my - g.rect.top - ch / 2) / s,
+      };
+      this._layout();
+      return;
+    }
+
+    const it = this.selectedItem();
+    if (!it) return;
     if (g.type === 'drag' && this.pointers.size === 1) {
       const p = this.toWorld(e.clientX, e.clientY);
       const dx = p.x - g.start.x, dy = p.y - g.start.y;
       if (!g.moved && Math.hypot(dx, dy) * this.view.s < 4) return; // ignore tiny wobble on tap
       g.moved = true;
+      g.edited = true;
       const { w, h } = this.world;
       it.x = clamp(g.x0 + dx, -w * 0.25, w * 1.25);
       it.y = clamp(g.y0 + dy, -h * 0.25, h * 1.25);
@@ -339,7 +456,7 @@ export class Editor {
       const d = Math.hypot(wb.x - wa.x, wb.y - wa.y) || 1;
       const ang = Math.atan2(wb.y - wa.y, wb.x - wa.x);
       const m = { x: (wa.x + wb.x) / 2, y: (wa.y + wb.y) / 2 };
-      g.moved = true;
+      g.edited = true;
       it.scale = clamp(g.s0 * (d / g.d0), MIN_SCALE, MAX_SCALE);
       it.rot = g.r0 + (ang - g.a0);
       it.x = g.x0 + (m.x - g.m0.x);
@@ -356,16 +473,21 @@ export class Editor {
       // Went from two fingers to one: carry on dragging without a jump.
       this._startDrag();
     } else if (this.pointers.size === 0) {
-      const moved = this.gesture && this.gesture.moved;
+      const g = this.gesture;
       this.gesture = null;
-      if (moved) this.commit();
+      if (g && g.type === 'pan' && g.tap) this.select(null);  // tapped an empty spot
+      if (g && g.edited) this.commit();
     }
   }
 
   _wheel(e) {
     const it = this.selectedItem();
-    if (!it) return;
     e.preventDefault();
+    if (!it) {
+      // No flower chosen: the wheel zooms the whole picture around the mouse.
+      this.setZoom(this.zoom * Math.exp(-e.deltaY * 0.0015), e.clientX, e.clientY);
+      return;
+    }
     if (e.shiftKey) it.rot += (e.deltaY > 0 ? 1 : -1) * (Math.PI / 36);
     else it.scale = clamp(it.scale * Math.exp(-e.deltaY * 0.0015), MIN_SCALE, MAX_SCALE);
     this.render();
@@ -395,6 +517,12 @@ export class Editor {
       size = m * 0.38; x = w / 2 + spreadX; y = h * 0.45 + spreadY;
     } else {
       size = m * 0.24; x = w / 2 + spreadX; y = h * 0.4 + spreadY;
+    }
+    // Zoomed in: put it where she is looking, a bit smaller so it fits the view.
+    if (this.zoom > 1) {
+      x = this.center.x + spreadX / this.zoom;
+      y = this.center.y + spreadY / this.zoom;
+      size /= Math.sqrt(this.zoom);
     }
     // Tall thin pictures (long stems, slim vases) are measured by height, others by width.
     const tall = b.h > b.w * 1.6;

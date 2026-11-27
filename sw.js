@@ -2,7 +2,7 @@
 // (for example in church). When you change any file, raise VERSION by one so
 // phones pick up the new version.
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'flower-ideas-' + VERSION;
 
 const SHELL = [
@@ -20,7 +20,10 @@ const SHELL = [
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/apple-touch-icon.png',
+  'icons/icon-maskable-512.png',
 ];
+
+const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
@@ -54,6 +57,18 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+
+  if (FONT_HOSTS.includes(url.hostname)) {
+    // The Poppins font: keep a copy so the app looks the same offline.
+    event.respondWith((async () => {
+      const cached = await caches.match(req);
+      if (cached) return cached;
+      const res = await fetch(req);
+      if (res.ok || res.type === 'opaque') (await caches.open(CACHE)).put(req, res.clone());
+      return res;
+    })());
+    return;
+  }
   if (url.origin !== self.location.origin) return;
 
   const isPicture = /\.(webp|png|jpg|jpeg)$/i.test(url.pathname);

@@ -29,6 +29,11 @@ let trayUrls = [];
 
 // ---------------------------------------------------------------- helpers
 
+/** A thin line icon from the sprite in index.html. */
+function icon(name) {
+  return `<svg class="i" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+}
+
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
@@ -74,7 +79,7 @@ function dialog({ title, body = '', input = null, buttons, stacked = false }) {
     for (const b of buttons) {
       const el = document.createElement('button');
       el.type = 'button';
-      el.className = 'btn btn-' + (b.style || 'ghost');
+      el.className = 'pill-btn ' + (b.style || 'ghost');
       el.innerHTML = b.label;
       el.addEventListener('click', () => {
         if (b.onClick) { b.onClick(); return; }
@@ -129,7 +134,7 @@ async function renderHome() {
   const grid = $('#design-grid');
   grid.innerHTML = '';
   $('#empty-home').hidden = designs.length > 0;
-  $('#saved-title').hidden = designs.length === 0;
+  $('#design-count').textContent = designs.length ? designs.length + (designs.length === 1 ? ' design' : ' designs') : '';
 
   for (const d of designs) {
     const li = document.createElement('li');
@@ -148,7 +153,7 @@ async function renderHome() {
         <span class="design-name">${escapeHtml(d.name)}</span>
         <span class="design-date">${niceDate(d.updated)}</span>
       </button>
-      <button class="design-more" type="button" aria-label="More for ${escapeHtml(d.name)}">⋯</button>`;
+      <button class="design-more" type="button" aria-label="More for ${escapeHtml(d.name)}">${icon('more')}</button>`;
     li.querySelector('.design-open').addEventListener('click', () => openDesign(d.id));
     li.querySelector('.design-more').addEventListener('click', () => designMenu(d));
     grid.appendChild(li);
@@ -160,10 +165,10 @@ async function designMenu(d) {
     title: d.name,
     stacked: true,
     buttons: [
-      { label: '✏️ Open', value: 'open', style: 'primary' },
-      { label: '🔤 Change name', value: 'rename' },
-      { label: '⧉ Make a copy', value: 'copy' },
-      { label: '🗑️ Delete', value: 'delete' },
+      { label: icon('next') + 'Open', value: 'open', style: 'primary' },
+      { label: icon('edit') + 'Change name', value: 'rename' },
+      { label: icon('copy') + 'Make a copy', value: 'copy' },
+      { label: icon('trash') + 'Delete', value: 'delete' },
       { label: 'Cancel', value: null },
     ],
   });
@@ -260,8 +265,17 @@ function setupEditor() {
       $('#selection-bar').hidden = !it;
       updateHint();
     },
+    onViewChange: zoom => {
+      $('#zoom-label').textContent = Math.round(zoom * 100) + '%';
+      $('#btn-zoom-in').disabled = zoom >= 5.99;
+      $('#btn-zoom-out').disabled = zoom <= 1.001;
+      $('#btn-zoom-fit').disabled = zoom <= 1.001;
+    },
   });
 
+  $('#btn-zoom-in').addEventListener('click', () => editor.zoomIn());
+  $('#btn-zoom-out').addEventListener('click', () => editor.zoomOut());
+  $('#btn-zoom-fit').addEventListener('click', () => editor.resetZoom());
   $('#btn-undo').addEventListener('click', () => editor.undo());
   $('#btn-redo').addEventListener('click', () => editor.redo());
   $('#btn-editor-back').addEventListener('click', () => history.back());
@@ -400,13 +414,13 @@ async function setTab(cat) {
   box.scrollLeft = 0;
 
   if (cat === 'mine') {
-    box.appendChild(actionTile('📋', 'Paste', pasteFlower));
-    box.appendChild(actionTile('🖼️', 'Photos', () => $('#input-my-flower').click()));
+    box.appendChild(actionTile('clipboard', 'Paste', pasteFlower));
+    box.appendChild(actionTile('image', 'Photos', () => $('#input-my-flower').click()));
     const mine = await db.listMyFlowers();
     if (!mine.length) {
       const p = document.createElement('p');
       p.className = 'tray-empty';
-      p.innerHTML = 'Flowers you paste or add from your photos will be kept here. Tap <strong>❓ Help</strong> to see how.';
+      p.innerHTML = 'Flowers you paste or add from your photos will be kept here. Tap <strong>Help</strong> at the top to see how.';
       box.appendChild(p);
     }
     for (const rec of mine) {
@@ -416,7 +430,7 @@ async function setTab(cat) {
       const rm = document.createElement('button');
       rm.type = 'button';
       rm.className = 'tray-remove';
-      rm.textContent = '✕';
+      rm.innerHTML = icon('close');
       rm.setAttribute('aria-label', 'Remove from My flowers');
       rm.addEventListener('click', async e => {
         e.stopPropagation();
@@ -443,11 +457,11 @@ async function setTab(cat) {
   for (const f of list) box.appendChild(flowerTile(f.file, f.name, { kind: 'lib', id: f.id }));
 }
 
-function actionTile(icon, label, onClick) {
+function actionTile(iconName, label, onClick) {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'tray-item tray-action';
-  b.innerHTML = `<span class="big" aria-hidden="true">${icon}</span><span class="label">${label}</span>`;
+  b.innerHTML = `<span class="big">${icon(iconName)}</span><span class="label">${label}</span>`;
   b.addEventListener('click', onClick);
   return b;
 }
@@ -481,13 +495,13 @@ async function pasteFlower() {
       await dialog({
         title: 'Paste was not allowed',
         body: '<p>Your phone asked whether this app may paste. Please tap <strong>Paste</strong> or <strong>Allow</strong> when it asks.</p>' +
-          '<p>Or use <strong>🖼️ Photos</strong> (in ⭐ My flowers) instead.</p>',
+          '<p>Or use <strong>Photos</strong> (in <strong>My flowers</strong>) instead.</p>',
         buttons: [{ label: 'OK', value: true, style: 'primary' }],
       });
     } else if (err.code === 'unsupported') {
       await dialog({
         title: 'Paste does not work here',
-        body: '<p>This browser cannot paste pictures. Please save the flower to your photos first, then use <strong>🖼️ Photos</strong> (in ⭐ My flowers).</p>',
+        body: '<p>This browser cannot paste pictures. Please save the flower to your photos first, then use <strong>Photos</strong> (in <strong>My flowers</strong>).</p>',
         buttons: [{ label: 'OK', value: true, style: 'primary' }],
       });
     } else {
@@ -506,7 +520,7 @@ function pasteHowToHtml() {
       <li><strong>iPhone / iPad:</strong> open the photo in <em>Photos</em>, press and hold on the flower until it glows, then tap <strong>Copy</strong>.</li>
       <li><strong>Android:</strong> open the photo in <em>Gallery</em> or <em>Google Photos</em>, press and hold on the flower, then tap <strong>Copy</strong>.</li>
     </ul>
-    <p>Then come back here and tap <strong>📋 Paste</strong>.</p>`;
+    <p>Then come back here and tap <strong>Paste</strong>.</p>`;
 }
 
 async function addCutout(blob) {
@@ -517,7 +531,7 @@ async function addCutout(blob) {
     db.requestPersistence();
     await editor.addItem({ kind: 'mine', id: rec.id });
     await setTab('mine');
-    toast('Added — it is also kept in ⭐ My flowers');
+    toast('Added — also kept in My flowers');
   } catch (err) {
     console.error(err);
     toast('Sorry, that picture could not be used');
@@ -568,10 +582,10 @@ async function exportPicture() {
 
   const buttons = [];
   if (isIOS && canShare) {
-    buttons.push({ label: '📥 Save to Photos', style: 'primary', onClick: share });
+    buttons.push({ label: icon('download') + 'Save to Photos', style: 'primary', onClick: share });
   } else {
-    buttons.push({ label: '📥 Save to my phone', style: 'primary', onClick: download });
-    if (canShare) buttons.push({ label: '📤 Send / Share', onClick: share });
+    buttons.push({ label: icon('download') + 'Save to my phone', style: 'primary', onClick: download });
+    if (canShare) buttons.push({ label: 'Send / Share', onClick: share });
   }
   buttons.push({ label: 'Close', value: null });
 
@@ -591,16 +605,16 @@ async function exportPicture() {
 
 const HELP_PAGES = [
   {
-    emoji: '⛪📷',
+    icon: 'camera',
     title: 'Welcome!',
     html: `<p>Try out flower ideas before you make them.</p>
       <ul>
-        <li>Tap <strong>➕ New arrangement</strong>.</li>
+        <li>Tap <strong>New arrangement</strong>.</li>
         <li>Take a photo of the place in church (the altar, a stand, a window), or choose one you already have.</li>
       </ul>`,
   },
   {
-    emoji: '🌹👆',
+    icon: 'flower',
     title: 'Add flowers',
     html: `<ul>
         <li>At the bottom are the flowers. Slide left and right to see more.</li>
@@ -609,26 +623,35 @@ const HELP_PAGES = [
       </ul>`,
   },
   {
-    emoji: '✋🔄',
+    icon: 'hand',
     title: 'Move and change',
     html: `<ul>
         <li><strong>Tap</strong> a flower in the picture to choose it. <strong>Drag</strong> it with one finger.</li>
-        <li>Use two fingers to make it bigger, smaller or to turn it — or use the big buttons: <strong>Bigger</strong>, <strong>Smaller</strong>, <strong>Turn</strong>, <strong>Front</strong>, <strong>Back</strong>, <strong>Remove</strong>.</li>
-        <li>Made a mistake? Tap <strong>↶ Undo</strong> at the top.</li>
+        <li>Use two fingers to make it bigger, smaller or to turn it — or use the buttons: <strong>Bigger</strong>, <strong>Smaller</strong>, <strong>Turn</strong>, <strong>Front</strong>, <strong>Back</strong>, <strong>Remove</strong>.</li>
+        <li>Made a mistake? Tap <strong>Undo</strong> at the top.</li>
       </ul>`,
   },
   {
-    emoji: '⭐📋',
-    title: 'Use your own flowers',
-    html: pasteHowToHtml().replace('Then come back here and tap', 'Then open <strong>⭐ My flowers</strong> here and tap') +
-      '<p>Your flower is kept in <strong>⭐ My flowers</strong> for next time.</p>',
+    icon: 'fit',
+    title: 'Look up close',
+    html: `<ul>
+        <li>Tap <strong>+</strong> and <strong>−</strong> on the right of the picture to zoom in and out.</li>
+        <li>Or, when no flower is chosen, pinch the picture with two fingers.</li>
+        <li>When zoomed in, drag an empty spot to look around. The <strong>corners</strong> button shows the whole picture again.</li>
+      </ul>`,
   },
   {
-    emoji: '💾🖼️',
+    icon: 'star',
+    title: 'Use your own flowers',
+    html: pasteHowToHtml().replace('Then come back here and tap', 'Then open <strong>My flowers</strong> here and tap') +
+      '<p>Your flower is kept in <strong>My flowers</strong> for next time.</p>',
+  },
+  {
+    icon: 'download',
     title: 'Saving',
     html: `<ul>
-        <li>Everything is <strong>saved by itself</strong>. Tap <strong>← Done</strong> to go back to your list.</li>
-        <li>Tap <strong>💾 Save picture</strong> to keep a photo of your idea or send it to family.</li>
+        <li>Everything is <strong>saved by itself</strong>. Tap <strong>Done</strong> to go back to your list.</li>
+        <li>Tap <strong>Save picture</strong> to keep a photo of your idea or send it to family.</li>
       </ul>`,
   },
 ];
@@ -644,13 +667,13 @@ function openHelp(page = 0) {
 function renderHelp() {
   const p = HELP_PAGES[helpPage];
   $('#help-pages').innerHTML = `<div class="help-page">
-      <div class="help-emoji" aria-hidden="true">${p.emoji}</div>
+      <div class="help-icon">${icon(p.icon)}</div>
       <h2 id="help-heading">${p.title}</h2>
       ${p.html}
     </div>`;
   $('#help-dots').innerHTML = HELP_PAGES.map((_, i) => `<span class="${i === helpPage ? 'on' : ''}"></span>`).join('');
   $('#help-prev').style.visibility = helpPage === 0 ? 'hidden' : 'visible';
-  $('#help-next').textContent = helpPage === HELP_PAGES.length - 1 ? 'Got it ✔' : 'Next →';
+  $('#help-next').textContent = helpPage === HELP_PAGES.length - 1 ? 'Got it' : 'Next';
 }
 
 function setupHelp() {

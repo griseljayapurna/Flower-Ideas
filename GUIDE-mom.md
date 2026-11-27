@@ -2,7 +2,7 @@
 
 Try out your flower arrangements on the phone before you make them in church.
 
-**Open this link:** https://YOUR-GITHUB-USERNAME.github.io/flower-ideas/
+**Open this link:** https://griseljayapurna.github.io/Flower-Ideas/
 
 ---
 
@@ -20,32 +20,39 @@ This adds an app icon, and it also keeps your arrangements safe.
 2. Tap the **⋮** (three dots) at the top right.
 3. Tap **Add to Home screen** or **Install app**, then **Add / Install**.
 
-From now on, open it with the 🌼 **Flower Ideas** icon.
+From now on, open it with the purple 🌼 **Flower Ideas** icon.
 
 ## 2. Start an arrangement
 
-1. Tap **➕ New arrangement**.
-2. Tap **📷 Take a photo** to photograph the place in church (altar, stand, window).
-   Or tap **🖼️ Choose from my photos** to use one you already took.
-   No photo yet? Choose a plain colour.
+1. Tap the big purple **New arrangement** card.
+2. Tap **Take a photo** to photograph the place in church (altar, stand, window).
+   Or tap **Choose from my photos** to use one you already took.
+   No photo yet? Tap one of the **plain colour** circles.
 
 ## 3. Add flowers
 
 - At the bottom are the flowers. **Slide left and right** to see more.
-- The tabs: 🌹 **Flowers**, 🌿 **Greenery**, 🏺 **Vases**, ⭐ **My flowers**.
-- **Tap a flower** and it appears in the middle of your picture.
+- The tabs: **Flowers**, **Greenery**, **Vases**, **My flowers**.
+- **Tap a flower** and it appears on your picture. Flowers slip in behind the vase, so the stems look like they are in it.
 
 ## 4. Move and change a flower
 
 - **Tap** a flower in the picture to choose it (a dotted line appears around it).
 - **Drag** it with one finger.
 - **Two fingers**: pinch to make it smaller or bigger, twist to turn it.
-- Or use the big buttons:
+- Or use the buttons that appear:
   **Bigger · Smaller · Turn · Flip · Front · Back · Copy · Remove**
-- Tap **✔ OK** when you are done with that flower.
-- Made a mistake? Tap **↶ Undo** at the top.
+- Tap **OK** (the round ✓) when you are done with that flower.
+- Made a mistake? Tap **Undo** at the top.
 
-## 5. Use your own flowers ⭐
+## 5. Look up close (zoom)
+
+- On the right of the picture are **+** and **−**. Tap **+** to zoom in on a detail, **−** to zoom out.
+- Or, when **no flower is chosen**, pinch the picture with two fingers.
+- When zoomed in, drag an **empty spot** to look around.
+- The button with **four corners** shows the whole picture again.
+
+## 6. Use your own flowers
 
 You can take a flower out of any photo on your phone:
 
@@ -53,25 +60,25 @@ You can take a flower out of any photo on your phone:
 1. Open the photo in the **Photos** app.
 2. **Press and hold** on the flower until it glows, then let go.
 3. Tap **Copy**.
-4. Go back to Flower Ideas → **⭐ My flowers** → **📋 Paste**. If the phone asks, tap **Paste** again.
+4. Go back to Flower Ideas → **My flowers** → **Paste**. If the phone asks, tap **Paste** again.
 
 **Android (Samsung Galaxy and many newer phones):**
 1. Open the photo in **Gallery**.
 2. **Press and hold** on the flower until a line goes around it.
 3. Tap **Copy**.
-4. Go back to Flower Ideas → **⭐ My flowers** → **📋 Paste**. If the phone asks, tap **Allow**.
+4. Go back to Flower Ideas → **My flowers** → **Paste**. If the phone asks, tap **Allow**.
 
-Your flower is saved in **⭐ My flowers** to use again.
-*If your phone can't do this, tap 🖼️ **Photos** instead to add a picture.*
+Your flower is saved in **My flowers** to use again.
+*If your phone can't do this, tap **Photos** instead to add a picture.*
 
-## 6. Saving
+## 7. Saving
 
-- Everything is **saved by itself**. Tap **← Done** to see all your arrangements.
-- Tap **💾 Save picture** to put a photo of your idea in your phone's photos. Then you can show it in church or send it to family.
-- On the list screen, tap **⋯** on an arrangement to **change its name**, **make a copy** or **delete** it.
+- Everything is **saved by itself**. Tap **Done** (top left) to see all your arrangements.
+- Tap **Save picture** (top right) to put a photo of your idea in your phone's photos. Then you can show it in church or send it to family.
+- On the list screen, tap the round **•••** button on an arrangement to **change its name**, **make a copy** or **delete** it.
 
 ## Good to know
 
 - After the first time, it works **without internet**, even in church.
 - Your photos stay **only on your phone**. Nothing is sent anywhere.
-- Need help in the app? Tap **❓ Help**.
+- Need help in the app? Tap **Help** (the round **?** button).

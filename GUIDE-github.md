@@ -48,6 +48,7 @@ Open the link on your phone and check:
 - [ ] **New arrangement → Choose from my photos** opens your photos, and the picture appears.
 - [ ] Tapping a flower in the bottom tray adds it. One finger moves it. Two fingers resize and turn it.
 - [ ] The **Bigger / Smaller / Turn / Remove** buttons work. So does **Undo**.
+- [ ] **Zoom:** the **+ / −** buttons on the right zoom in and out. With no flower chosen, a two-finger pinch zooms the picture, and dragging an empty spot moves around.
 - [ ] **⭐ My flowers → 📋 Paste**: copy a flower from a photo first (see GUIDE-mom.md). It should appear.
 - [ ] **← Done**, close the browser, open the link again: the arrangement is still there.
 - [ ] **💾 Save picture** saves an image to your photos/gallery.

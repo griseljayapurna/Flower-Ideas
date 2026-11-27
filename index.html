@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Flower Ideas</title>
+  <meta name="description" content="Try out church flower arrangements on your phone before you make them.">
+  <meta name="theme-color" content="#5b7f5e">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Flower Ideas">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============ HOME ============ -->
+  <section id="screen-home" class="screen active" aria-labelledby="home-title">
+    <header class="topbar">
+      <h1 id="home-title" class="app-title"><span aria-hidden="true">💐</span> Flower Ideas</h1>
+      <button class="btn btn-ghost" data-action="help" type="button"><span aria-hidden="true">❓</span> Help</button>
+    </header>
+    <main class="home-main">
+      <button id="btn-new" class="btn btn-primary btn-huge" type="button">
+        <span aria-hidden="true">➕</span> New arrangement
+      </button>
+      <h2 class="section-title" id="saved-title">My arrangements</h2>
+      <p id="empty-home" class="empty-note" hidden>Nothing saved yet. Tap <strong>New arrangement</strong> to start.</p>
+      <ul id="design-grid" class="design-grid" aria-labelledby="saved-title"></ul>
+      <p class="footer-note"><a href="credits.html">Photo credits</a></p>
+    </main>
+  </section>
+
+  <!-- ============ NEW ARRANGEMENT ============ -->
+  <section id="screen-new" class="screen" aria-labelledby="new-title">
+    <header class="topbar">
+      <button class="btn btn-ghost" data-action="go-home" type="button"><span aria-hidden="true">←</span> Back</button>
+      <h1 id="new-title" class="screen-title">New arrangement</h1>
+      <span class="topbar-spacer"></span>
+    </header>
+    <main class="new-main">
+      <p class="lead">First, choose a background.<br>A photo of the place in church works best.</p>
+      <label class="btn btn-primary btn-huge file-btn">
+        <span aria-hidden="true">📷</span> Take a photo
+        <input id="input-camera" type="file" accept="image/*" capture="environment">
+      </label>
+      <label class="btn btn-primary btn-huge file-btn">
+        <span aria-hidden="true">🖼️</span> Choose from my photos
+        <input id="input-bg-photo" type="file" accept="image/*">
+      </label>
+      <p class="or">— or a plain colour —</p>
+      <div id="color-choices" class="color-choices"></div>
+    </main>
+  </section>
+
+  <!-- ============ EDITOR ============ -->
+  <section id="screen-editor" class="screen editor" aria-label="Design your arrangement">
+    <header class="topbar editor-top">
+      <button class="btn btn-ghost" id="btn-editor-back" type="button"><span aria-hidden="true">←</span> Done</button>
+      <div class="topbar-group">
+        <button class="btn btn-ghost btn-icon" id="btn-undo" type="button" aria-label="Undo"><span aria-hidden="true">↶</span><small>Undo</small></button>
+        <button class="btn btn-ghost btn-icon" id="btn-redo" type="button" aria-label="Redo"><span aria-hidden="true">↷</span><small>Redo</small></button>
+        <button class="btn btn-ghost btn-icon" data-action="help" type="button" aria-label="Help"><span aria-hidden="true">❓</span><small>Help</small></button>
+      </div>
+      <button class="btn btn-primary" id="btn-export" type="button"><span aria-hidden="true">💾</span> Save picture</button>
+    </header>
+
+    <div id="stage" class="stage">
+      <canvas id="canvas" aria-label="Your arrangement"></canvas>
+      <p id="stage-hint" class="stage-hint">Tap a flower below to add it</p>
+
+    <!-- Shown when a flower is selected -->
+    <div id="selection-bar" class="selection-bar" hidden>
+      <button class="tool" data-tool="bigger" type="button"><span aria-hidden="true">➕</span>Bigger</button>
+      <button class="tool" data-tool="smaller" type="button"><span aria-hidden="true">➖</span>Smaller</button>
+      <button class="tool" data-tool="rotate-left" type="button"><span aria-hidden="true">↺</span>Turn</button>
+      <button class="tool" data-tool="rotate-right" type="button"><span aria-hidden="true">↻</span>Turn</button>
+      <button class="tool" data-tool="flip" type="button"><span aria-hidden="true">⇋</span>Flip</button>
+      <button class="tool" data-tool="front" type="button"><span aria-hidden="true">⬆</span>Front</button>
+      <button class="tool" data-tool="back" type="button"><span aria-hidden="true">⬇</span>Back</button>
+      <button class="tool" data-tool="copy" type="button"><span aria-hidden="true">⧉</span>Copy</button>
+      <button class="tool tool-danger" data-tool="delete" type="button"><span aria-hidden="true">🗑️</span>Remove</button>
+      <button class="tool tool-done" data-tool="deselect" type="button"><span aria-hidden="true">✔</span>OK</button>
+    </div>
+    </div>
+
+    <!-- Flower tray -->
+    <div class="tray" id="tray">
+      <div class="tray-tabs" role="tablist">
+        <button class="tab active" role="tab" data-cat="flowers" type="button" aria-selected="true"><span class="tab-icon" aria-hidden="true">🌹</span>Flowers</button>
+        <button class="tab" role="tab" data-cat="greenery" type="button" aria-selected="false"><span class="tab-icon" aria-hidden="true">🌿</span>Greenery</button>
+        <button class="tab" role="tab" data-cat="vases" type="button" aria-selected="false"><span class="tab-icon" aria-hidden="true">🏺</span>Vases</button>
+        <button class="tab" role="tab" data-cat="mine" type="button" aria-selected="false"><span class="tab-icon" aria-hidden="true">⭐</span>My flowers</button>
+      </div>
+      <div class="tray-items" id="tray-items" role="tabpanel"></div>
+    </div>
+  </section>
+
+  <!-- ============ HELP ============ -->
+  <div id="help" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="help-heading">
+    <div class="help-card">
+      <div id="help-pages"></div>
+      <div class="help-dots" id="help-dots" aria-hidden="true"></div>
+      <div class="dialog-buttons">
+        <button class="btn btn-ghost" id="help-prev" type="button">← Back</button>
+        <button class="btn btn-primary" id="help-next" type="button">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DIALOG ============ -->
+  <div id="dialog" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <div class="dialog">
+      <h2 id="dialog-title"></h2>
+      <div id="dialog-body"></div>
+      <div id="dialog-buttons" class="dialog-buttons"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <div id="busy" class="overlay busy" hidden><div class="spinner" aria-label="Please wait"></div></div>
+
+  <!-- hidden file input for "Add from photos" in the tray -->
+  <input id="input-my-flower" type="file" accept="image/*" hidden>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

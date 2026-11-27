@@ -53,7 +53,7 @@ function busy(on) { $('#busy').hidden = !on; }
  * Simple pop-up. buttons: [{ label, value, style: 'primary'|'ghost'|'danger' }]
  * Resolves with the chosen value (or the typed text when `input` is given).
  */
-function dialog({ title, body = '', input = null, buttons, stacked = false }) {
+function dialog({ title, body = '', input = null, placeholder = '', buttons, stacked = false }) {
   return new Promise(resolve => {
     const box = $('#dialog');
     $('#dialog-title').textContent = title;
@@ -66,6 +66,8 @@ function dialog({ title, body = '', input = null, buttons, stacked = false }) {
       field.type = 'text';
       field.value = input;
       field.maxLength = 60;
+      if (placeholder) field.placeholder = placeholder;
+      field.autocapitalize = 'sentences';
       bodyEl.appendChild(field);
     }
     const btnWrap = $('#dialog-buttons');
@@ -426,22 +428,18 @@ async function setTab(cat) {
     for (const rec of mine) {
       const url = URL.createObjectURL(rec.blob);
       trayUrls.push(url);
-      const tile = flowerTile(url, 'My flower', { kind: 'mine', id: rec.id });
-      const rm = document.createElement('button');
-      rm.type = 'button';
-      rm.className = 'tray-remove';
-      rm.innerHTML = icon('close');
-      rm.setAttribute('aria-label', 'Remove from My flowers');
-      rm.addEventListener('click', async e => {
+      const name = rec.name || 'My flower';
+      const tile = flowerTile(url, name, { kind: 'mine', id: rec.id });
+      const more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'tray-remove';
+      more.innerHTML = icon('more');
+      more.setAttribute('aria-label', 'Change or remove ' + name);
+      more.addEventListener('click', e => {
         e.stopPropagation();
-        const sure = await dialog({
-          title: 'Remove this flower?',
-          body: '<p>It will be taken out of <strong>My flowers</strong>. Arrangements that already use it will keep it.</p>',
-          buttons: [{ label: 'Yes, remove', value: true, style: 'danger' }, { label: 'No', value: false }],
-        });
-        if (sure) { await db.removeMyFlower(rec.id); setTab('mine'); }
+        myFlowerMenu(rec, url);
       });
-      tile.appendChild(rm);
+      tile.appendChild(more);
       box.appendChild(tile);
     }
     return;
@@ -451,7 +449,7 @@ async function setTab(cat) {
   if (!list.length) {
     const p = document.createElement('p');
     p.className = 'tray-empty';
-    p.textContent = 'No pictures here yet. Use ⭐ My flowers to add your own.';
+    p.textContent = 'No pictures here yet. Use My flowers to add your own.';
     box.appendChild(p);
   }
   for (const f of list) box.appendChild(flowerTile(f.file, f.name, { kind: 'lib', id: f.id }));
@@ -523,18 +521,74 @@ function pasteHowToHtml() {
     <p>Then come back here and tap <strong>Paste</strong>.</p>`;
 }
 
+/** Ask what a flower is called. Returns the name, or null if she skips. */
+async function askFlowerName(previewUrl, current = '') {
+  const name = await dialog({
+    title: current ? 'Change name' : 'What is this flower?',
+    body: `<img class="name-preview" src="${previewUrl}" alt="">` +
+      (current ? '' : '<p class="small-note">Give it a name so you can find it again in My flowers.</p>'),
+    input: current,
+    placeholder: 'e.g. Pink carnation',
+    buttons: [
+      { label: 'Save', value: 'ok', style: 'primary' },
+      { label: current ? 'Cancel' : 'Skip', value: null },
+    ],
+  });
+  return name ? name.slice(0, 40) : null;
+}
+
+async function myFlowerMenu(rec, url) {
+  const name = rec.name || 'My flower';
+  const choice = await dialog({
+    title: name,
+    body: `<img class="name-preview" src="${url}" alt="">`,
+    stacked: true,
+    buttons: [
+      { label: icon('edit') + 'Change name', value: 'rename', style: 'primary' },
+      { label: icon('trash') + 'Remove from My flowers', value: 'remove' },
+      { label: 'Cancel', value: null },
+    ],
+  });
+  if (choice === 'rename') {
+    const newName = await askFlowerName(url, name);
+    if (newName) { await db.renameMyFlower(rec.id, newName); await setTab('mine'); toast('Name saved'); }
+  } else if (choice === 'remove') {
+    const sure = await dialog({
+      title: 'Remove this flower?',
+      body: `<p>“${escapeHtml(name)}” will be taken out of <strong>My flowers</strong>. Arrangements that already use it will keep it.</p>`,
+      buttons: [{ label: 'Yes, remove', value: true, style: 'danger' }, { label: 'No', value: false }],
+    });
+    if (sure) { await db.removeMyFlower(rec.id); await setTab('mine'); }
+  }
+}
+
 async function addCutout(blob) {
   busy(true);
+  let png;
   try {
-    const png = await prepareCutout(blob);
-    const rec = await db.putImage('mine', png);
+    png = await prepareCutout(blob);
+  } catch (err) {
+    console.error(err);
+    busy(false);
+    toast('Sorry, that picture could not be used');
+    return;
+  }
+  busy(false);
+
+  const previewUrl = URL.createObjectURL(png);
+  const name = await askFlowerName(previewUrl);
+  URL.revokeObjectURL(previewUrl);
+
+  busy(true);
+  try {
+    const rec = await db.putImage('mine', png, { name: name || 'My flower' });
     db.requestPersistence();
     await editor.addItem({ kind: 'mine', id: rec.id });
     await setTab('mine');
     toast('Added — also kept in My flowers');
   } catch (err) {
     console.error(err);
-    toast('Sorry, that picture could not be used');
+    toast('Sorry, that picture could not be saved');
   } finally {
     busy(false);
   }
@@ -610,7 +664,7 @@ const HELP_PAGES = [
     html: `<p>Try out flower ideas before you make them.</p>
       <ul>
         <li>Tap <strong>New arrangement</strong>.</li>
-        <li>Take a photo of the place in church (the altar, a stand, a window), or choose one you already have.</li>
+        <li>Take a photo of the place where the flowers will go (a table, a stand, a window), or choose one you already have.</li>
       </ul>`,
   },
   {
@@ -644,7 +698,8 @@ const HELP_PAGES = [
     icon: 'star',
     title: 'Use your own flowers',
     html: pasteHowToHtml().replace('Then come back here and tap', 'Then open <strong>My flowers</strong> here and tap') +
-      '<p>Your flower is kept in <strong>My flowers</strong> for next time.</p>',
+      '<p>Give it a name (for example “Pink carnation”). It is kept in <strong>My flowers</strong> for next time. ' +
+      'Tap the round <strong>•••</strong> on it to change the name or remove it.</p>',
   },
   {
     icon: 'download',
@@ -678,6 +733,9 @@ function renderHelp() {
 
 function setupHelp() {
   $$('[data-action="help"]').forEach(b => b.addEventListener('click', () => openHelp(0)));
+  $('#help-close').addEventListener('click', () => { $('#help').hidden = true; });
+  // Escape key closes help too.
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#help').hidden) $('#help').hidden = true; });
   $('#help-prev').addEventListener('click', () => { if (helpPage > 0) { helpPage--; renderHelp(); } });
   $('#help-next').addEventListener('click', () => {
     if (helpPage < HELP_PAGES.length - 1) { helpPage++; renderHelp(); }

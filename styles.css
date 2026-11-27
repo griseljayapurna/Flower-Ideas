@@ -633,7 +633,34 @@ button { font-family: inherit; }
   -webkit-touch-callout: default;
 }
 .small-note { font-size: 0.85rem; color: var(--muted); }
+.name-preview {
+  display: block;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 12px;
+  padding: 8px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--tint-2);
+}
 
+.help-card { position: relative; }
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--tint-2);
+  color: var(--muted);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.close-btn:active { background: var(--tint); color: var(--primary); }
 .help-page { text-align: center; }
 .help-icon {
   display: grid;

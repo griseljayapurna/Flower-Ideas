@@ -1,6 +1,6 @@
 // Loading, shrinking and reading pictures.
 
-const BG_MAX = 2048;      // longest side of a church photo
+const BG_MAX = 2048;      // longest side of a background photo
 const CUTOUT_MAX = 900;   // longest side of a pasted flower
 
 export function loadImage(src) {
@@ -38,7 +38,7 @@ function makeCanvas(w, h) {
   return c;
 }
 
-/** A church/background photo: shrink to a sensible size, save as JPEG. */
+/** A background photo: shrink to a sensible size, save as JPEG. */
 export async function prepareBackground(file) {
   const img = await loadImageFromBlob(file);
   const k = Math.min(1, BG_MAX / Math.max(img.naturalWidth, img.naturalHeight));

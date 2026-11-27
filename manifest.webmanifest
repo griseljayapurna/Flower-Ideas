@@ -1,7 +1,7 @@
 {
   "name": "Flower Ideas",
   "short_name": "Flower Ideas",
-  "description": "Try out church flower arrangements on your phone before you make them.",
+  "description": "Try out flower arrangements on your phone before you make them.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

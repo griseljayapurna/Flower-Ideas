@@ -1,8 +1,8 @@
 // Keeps a copy of the app on the phone so it also works without internet
-// (for example in church). When you change any file, raise VERSION by one so
+// (for example where there is no signal). When you change any file, raise VERSION by one so
 // phones pick up the new version.
 
-const VERSION = 'v2';
+const VERSION = 'v4';
 const CACHE = 'flower-ideas-' + VERSION;
 
 const SHELL = [

@@ -1,6 +1,6 @@
 # 💐 Flower Ideas — how to use it
 
-Try out your flower arrangements on the phone before you make them in church.
+Try out your flower arrangements on the phone before you make them.
 
 **Open this link:** https://griseljayapurna.github.io/Flower-Ideas/
 
@@ -25,7 +25,7 @@ From now on, open it with the purple 🌼 **Flower Ideas** icon.
 ## 2. Start an arrangement
 
 1. Tap the big purple **New arrangement** card.
-2. Tap **Take a photo** to photograph the place in church (altar, stand, window).
+2. Tap **Take a photo** to photograph the place where the flowers will go (a table, a stand, a window).
    Or tap **Choose from my photos** to use one you already took.
    No photo yet? Tap one of the **plain colour** circles.
 
@@ -68,17 +68,18 @@ You can take a flower out of any photo on your phone:
 3. Tap **Copy**.
 4. Go back to Flower Ideas → **My flowers** → **Paste**. If the phone asks, tap **Allow**.
 
-Your flower is saved in **My flowers** to use again.
+The app asks what the flower is called. Type a name (for example *Pink carnation*) and tap **Save**, or tap **Skip**.
+Your flower is saved in **My flowers** with its name, to use again. To change the name or remove it, tap the round **•••** on it.
 *If your phone can't do this, tap **Photos** instead to add a picture.*
 
 ## 7. Saving
 
 - Everything is **saved by itself**. Tap **Done** (top left) to see all your arrangements.
-- Tap **Save picture** (top right) to put a photo of your idea in your phone's photos. Then you can show it in church or send it to family.
+- Tap **Save picture** (top right) to put a photo of your idea in your phone's photos. Then you can show it to others or send it to family.
 - On the list screen, tap the round **•••** button on an arrangement to **change its name**, **make a copy** or **delete** it.
 
 ## Good to know
 
-- After the first time, it works **without internet**, even in church.
+- After the first time, it works **without internet** too.
 - Your photos stay **only on your phone**. Nothing is sent anywhere.
 - Need help in the app? Tap **Help** (the round **?** button).

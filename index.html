@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Flower Ideas</title>
-  <meta name="description" content="Try out church flower arrangements on your phone before you make them.">
+  <meta name="description" content="Try out flower arrangements on your phone before you make them.">
   <meta name="theme-color" content="#eef0fa">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
@@ -60,7 +60,7 @@
     <main class="page">
       <header class="page-head">
         <div>
-          <p class="eyebrow">Church flowers</p>
+          <p class="eyebrow">Flower arranging</p>
           <h1 id="home-title" class="page-title">Flower Ideas</h1>
         </div>
         <button class="icon-btn" data-action="help" type="button" aria-label="Help">
@@ -71,7 +71,7 @@
       <button id="btn-new" class="hero-card" type="button">
         <span class="hero-text">
           <strong>New arrangement</strong>
-          <span>Try out an idea on a photo of the church</span>
+          <span>Try out an idea on a photo of the spot</span>
         </span>
         <span class="hero-plus" aria-hidden="true"><svg class="i"><use href="#i-plus"/></svg></span>
       </button>
@@ -105,7 +105,7 @@
       <div class="option-list">
         <label class="option-card file-btn">
           <span class="option-icon" aria-hidden="true"><svg class="i"><use href="#i-camera"/></svg></span>
-          <span class="option-text"><strong>Take a photo</strong><span>Photograph the place in church</span></span>
+          <span class="option-text"><strong>Take a photo</strong><span>Photograph the place for your flowers</span></span>
           <svg class="i chevron" aria-hidden="true"><use href="#i-next"/></svg>
           <input id="input-camera" type="file" accept="image/*" capture="environment">
         </label>
@@ -190,6 +190,9 @@
   <!-- ============ HELP ============ -->
   <div id="help" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="help-heading">
     <div class="help-card">
+      <button class="close-btn" id="help-close" type="button" aria-label="Close help">
+        <svg class="i" aria-hidden="true"><use href="#i-close"/></svg>
+      </button>
       <div id="help-pages"></div>
       <div class="help-dots" id="help-dots" aria-hidden="true"></div>
       <div class="dialog-buttons">

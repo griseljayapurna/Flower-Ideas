@@ -1,6 +1,6 @@
 # 💐 Flower Ideas
 
-A simple phone and tablet app for planning church flower arrangements. Take a photo of the spot in church, place flowers, greenery and vases on it, then move, resize and turn them with your fingers or big buttons.
+A simple phone and tablet app for planning flower arrangements. Take a photo of the spot where the flowers will go, place flowers, greenery and vases on it, then move, resize and turn them with your fingers or big buttons.
 
 - Works on iPhone, iPad and Android in the web browser. It can be added to the home screen like an app.
 - Works offline after the first visit.

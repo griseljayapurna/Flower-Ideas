@@ -82,8 +82,8 @@ export async function deleteDesign(id) {
 }
 
 // ---------- Images ----------
-export async function putImage(kind, blob) {
-  const rec = { id: newId(), kind, blob, created: Date.now() };
+export async function putImage(kind, blob, extra = {}) {
+  const rec = { id: newId(), kind, blob, created: Date.now(), ...extra };
   await promisify((await store('images', 'readwrite')).put(rec));
   return rec;
 }
@@ -96,6 +96,14 @@ export async function listMyFlowers() {
   const s = await store('images');
   const all = await promisify(s.index('kind').getAll('mine'));
   return all.filter(r => !r.hidden).sort((a, b) => b.created - a.created);
+}
+
+/** Give one of "My flowers" a new name. */
+export async function renameMyFlower(id, name) {
+  const rec = await getImage(id);
+  if (!rec) return;
+  rec.name = name;
+  await promisify((await store('images', 'readwrite')).put(rec));
 }
 
 /** Remove from "My flowers". Kept in storage while an arrangement still uses it. */

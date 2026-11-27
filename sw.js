@@ -2,7 +2,7 @@
 // (for example where there is no signal). When you change any file, raise VERSION by one so
 // phones pick up the new version.
 
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = 'flower-ideas-' + VERSION;
 
 const SHELL = [

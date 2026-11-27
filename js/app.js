@@ -1,4 +1,4 @@
-// Flower Ideas — screens, saving, the flower tray and help.
+// Bloom Board — screens, saving, the flower tray and help.
 
 import * as db from './storage.js';
 import { Editor } from './editor.js';

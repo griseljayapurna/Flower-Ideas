@@ -1,4 +1,4 @@
-# 💐 Flower Ideas
+# 💐 Bloom Board
 
 A simple phone and tablet app for planning flower arrangements. Take a photo of the spot where the flowers will go, place flowers, greenery and vases on it, then move, resize and turn them with your fingers or big buttons.
 

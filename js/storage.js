@@ -5,7 +5,7 @@
 //   items = [{ uid, src: { kind: 'lib' | 'mine', id }, x, y, scale, rot, flip }]  (bottom → top)
 // images:  { id, kind: 'bg' | 'mine', blob, created, hidden? }
 
-const DB_NAME = 'flower-ideas';
+const DB_NAME = 'flower-ideas';  // keep: renaming this would lose everyone's saved arrangements
 const DB_VERSION = 1;
 let dbPromise = null;
 

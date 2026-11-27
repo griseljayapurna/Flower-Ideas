@@ -1,4 +1,4 @@
-# Putting Flower Ideas online with GitHub
+# Putting Bloom Board online with GitHub
 
 GitHub stores the app's files. **GitHub Pages** (free) turns them into a web link that your mom opens on her phone. You don't need to install anything — it all happens in your web browser.
 

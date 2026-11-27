@@ -1,4 +1,4 @@
-# 💐 Flower Ideas — how to use it
+# 💐 Bloom Board — how to use it
 
 Try out your flower arrangements on the phone before you make them.
 
@@ -20,7 +20,7 @@ This adds an app icon, and it also keeps your arrangements safe.
 2. Tap the **⋮** (three dots) at the top right.
 3. Tap **Add to Home screen** or **Install app**, then **Add / Install**.
 
-From now on, open it with the purple 🌼 **Flower Ideas** icon.
+From now on, open it with the purple 🌼 **Bloom Board** icon.
 
 ## 2. Start an arrangement
 
@@ -60,13 +60,13 @@ You can take a flower out of any photo on your phone:
 1. Open the photo in the **Photos** app.
 2. **Press and hold** on the flower until it glows, then let go.
 3. Tap **Copy**.
-4. Go back to Flower Ideas → **My flowers** → **Paste**. If the phone asks, tap **Paste** again.
+4. Go back to Bloom Board → **My flowers** → **Paste**. If the phone asks, tap **Paste** again.
 
 **Android (Samsung Galaxy and many newer phones):**
 1. Open the photo in **Gallery**.
 2. **Press and hold** on the flower until a line goes around it.
 3. Tap **Copy**.
-4. Go back to Flower Ideas → **My flowers** → **Paste**. If the phone asks, tap **Allow**.
+4. Go back to Bloom Board → **My flowers** → **Paste**. If the phone asks, tap **Allow**.
 
 The app asks what the flower is called. Type a name (for example *Pink carnation*) and tap **Save**, or tap **Skip**.
 Your flower is saved in **My flowers** with its name, to use again. To change the name or remove it, tap the round **•••** on it.
